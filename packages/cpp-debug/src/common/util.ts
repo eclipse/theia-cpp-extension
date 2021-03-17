@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (C) 2021 Ericsson and others.
+ * Copyright (C) 2019 Ericsson and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,12 +14,21 @@
  * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
  ********************************************************************************/
 
-import { ContainerModule } from 'inversify';
-import { DebugAdapterContribution } from '@theia/debug/lib/common/debug-model';
-import { debugAdapterContributions } from './cpp-debug-backend-contribution';
+import * as Long from 'long';
 
-export default new ContainerModule(bind => {
-    for (const debugAdapterContribution of debugAdapterContributions) {
-        bind(DebugAdapterContribution).to(debugAdapterContribution).inSingletonScope();
+/**
+ * Parse `hexStr` as an hexadecimal string (with or without the leading 0x)
+ * and return the value as a Long.
+ */
+export function hexStrToUnsignedLong(hexStr: string): Long {
+    if (hexStr[0] === '0' && hexStr[1] === 'x') {
+        hexStr = hexStr.slice(2);
     }
-});
+
+    const lowStr = hexStr.slice(-8);
+    const highStr = hexStr.slice(0, hexStr.length - 8);
+    const low = parseInt(lowStr, 16);
+    const high = parseInt(highStr, 16);
+
+    return new Long(low, high, true);
+}
