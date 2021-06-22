@@ -16,6 +16,8 @@
 
 import { injectable, inject } from 'inversify';
 import { DebugSessionManager } from '@theia/debug/lib/browser/debug-session-manager';
+import * as Long from 'long';
+import { hexStrToUnsignedLong } from '../common/util';
 
 /**
  * Representation of a memory read result.
@@ -28,7 +30,7 @@ export interface MemoryReadResult {
     /**
      * The address for the read result.
      */
-    address: number,
+    address: Long,
 }
 
 export const MemoryProvider = Symbol('MemoryProvider');
@@ -41,6 +43,15 @@ export interface MemoryProvider {
      * any expression evaluating to an address.
      */
     readMemory(location: string, length: number, offset?: number): Promise<MemoryReadResult>;
+}
+
+/**
+ * Representation of a variable range.
+ */
+export interface VariableRange {
+    name: string;
+    address: Long;
+    pastTheEndAddress: Long;
 }
 
 /**
@@ -90,7 +101,7 @@ export class MemoryProviderImpl implements MemoryProvider {
         });
 
         const bytes = hex2bytes(result.body.data);
-        const address = parseInt(result.body.address, 16);
+        const address = hexStrToUnsignedLong(result.body.address);
 
         return { bytes, address };
     }
